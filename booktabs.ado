@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 1.0
+version 1.0.1
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -35,6 +35,8 @@ void booktabs(filename,mode){
     texfile[1] \ ("\usepackage{booktabs}") \ texfile[2..rows(texfile)]
   }
 
+  unlink(filename)
+  
   btfile = fopen(filename,"rw")
   for (i=1; i<=rows(texfile); i++){
     fput(btfile,texfile[i])
