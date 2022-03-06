@@ -30,7 +30,7 @@ void booktabs(filename,mode){
   texfile[rowmax(lines)] = "\bottomrule"
   texfile[rowmin(lines)] = "\toprule"
 
-  if (mode == "" & texfile[2,1] != "\usepackage{booktabs}"){
+  if (mode == ""){
     texfile =
     texfile[1] \ ("\usepackage{booktabs}") \ texfile[2..rows(texfile)]
   }
