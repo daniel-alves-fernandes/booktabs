@@ -1,0 +1,8 @@
+v 1.0.1
+d booktabs: exports Stata 17 tables in .tex format using booktabs.
+d
+d
+d Daniel Fernandes,
+d European University Institute, Florence
+d
+d daniel.fernandes@eui.eu
