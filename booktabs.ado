@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 1.0.1
+version 1.2
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -11,36 +11,72 @@ capture: program drop booktabs
 program define booktabs
   syntax using/, [tableonly] [replace] [append]
 
+  collect style cell border_block, border(left right, pattern(nil))
+
   collect export `using', `tableonly' `replace' `append'
   mata: booktabs("`using'","`tableonly'")
 end
 
 mata:
-void booktabs(filename,mode){
-  texfile = cat(filename)
+
+void mattofile(mat,filename){
+  unlink(filename)
+
+  tfile = fopen(filename,"rw")
+  for (i=1; i<=rows(mat); i++){
+    fput(tfile,mat[i])
+  }
+  fclose(tfile)
+}
+
+function getpos(mat,str){
+  numeric matrix lines
 
   lines = 0
-  for (i=1; i<=rows(texfile); i++){
-    if (strmatch(texfile[i],"\cline{*}")) lines = lines , i
+  for (i=1; i<=rows(mat); i++){
+    if (strmatch(mat[i],str)) lines = lines , i
   }
   lines = lines[1,2..cols(lines)]
+  return(lines)
+}
+
+void booktabs(filename,mode){
+  mat = cat(filename)
+
+  lines = getpos(mat,"\cline{*}")
   for (i=1; i<=cols(lines); i++){
-    texfile[lines[i]] = "\midrule"
+    opts = substr(mat[lines[1]],strpos(mat[lines[1]],"{"),.)
+    mat[lines[i]] = "\cmidrule" + opts
   }
-  texfile[rowmax(lines)] = "\bottomrule"
-  texfile[rowmin(lines)] = "\toprule"
+  mat[rowmax(lines)] = "\bottomrule"
+  mat[rowmin(lines)] = "\toprule"
 
   if (mode == ""){
-    texfile =
-    texfile[1] \ ("\usepackage{booktabs}") \ texfile[2..rows(texfile)]
+    mat =
+    mat[1] \ ("\usepackage{booktabs}") \ mat[2..rows(mat)]
   }
 
-  unlink(filename)
-  
-  btfile = fopen(filename,"rw")
-  for (i=1; i<=rows(texfile); i++){
-    fput(btfile,texfile[i])
-  }
-  fclose(btfile)
+  mattofile(mat,filename)
+}
+
+function addline(filename,tab,line,str){
+
+  string matrix mat
+  real scalar calltab
+  real scalar endtab
+  string matrix table
+  real scalar where
+
+  mat = cat(filename)
+  calltab = getpos(mat,"\begin{tabular}*")[tab]
+  endtab = getpos(mat,"\end{tabular}*")[tab]
+
+  table = mat[calltab..endtab]
+  where = getpos(table,"*\\")[line]
+
+  table = table[1..where] \ (str) \ table[where+1..rows(table)]
+  mat = mat[1..calltab-1] \ table \ mat[endtab..rows(mat)]
+
+  mattofile(mat,filename)
 }
 end
