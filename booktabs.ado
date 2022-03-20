@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 1.2
+version 2.0
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -9,17 +9,36 @@ contact: daniel.fernandes@eui.eu
 
 capture: program drop booktabs
 program define booktabs
-  syntax using/, [tableonly] [replace] [append]
+  syntax name(id="subcommand" name=subcommand) using/, *
+
+  if inlist("`subcommand'","export","addline") booktabs_`subcommand' `0'
+  else{
+    noisily: display as error "{bf:booktabs `subcommand'} not recognized"
+    exit 199
+  }
+
+end
+
+capture: program drop booktabs_export
+program define booktabs_export
+  syntax name using/, [tableonly] [replace] [append]
 
   collect style cell border_block, border(left right, pattern(nil))
 
   collect export `using', `tableonly' `replace' `append'
-  mata: booktabs("`using'","`tableonly'")
+  mata: booktabs_export("`using'","`tableonly'")
+end
+
+capture: program drop booktabs_addline
+program define booktabs_addline
+  syntax name using/, [table(integer 1)] line(integer) str(string)
+
+  mata: booktabs_addline("`using'",`table',`line',"`str'")
 end
 
 mata:
 
-void mattofile(mat,filename){
+void booktabs_mattofile(mat,filename){
   unlink(filename)
 
   tfile = fopen(filename,"rw")
@@ -29,7 +48,7 @@ void mattofile(mat,filename){
   fclose(tfile)
 }
 
-function getpos(mat,str){
+function booktabs_getpos(mat,str){
   numeric matrix lines
 
   lines = 0
@@ -40,10 +59,10 @@ function getpos(mat,str){
   return(lines)
 }
 
-void booktabs(filename,mode){
+void booktabs_export(filename,mode){
   mat = cat(filename)
 
-  lines = getpos(mat,"\cline{*}")
+  lines = booktabs_getpos(mat,"\cline{*}")
   for (i=1; i<=cols(lines); i++){
     opts = substr(mat[lines[1]],strpos(mat[lines[1]],"{"),.)
     mat[lines[i]] = "\cmidrule" + opts
@@ -52,31 +71,31 @@ void booktabs(filename,mode){
   mat[rowmin(lines)] = "\toprule"
 
   if (mode == ""){
-    mat =
-    mat[1] \ ("\usepackage{booktabs}") \ mat[2..rows(mat)]
+    mat = mat[1] \ ("\usepackage{booktabs}") \ mat[2..rows(mat)]
   }
 
-  mattofile(mat,filename)
+  booktabs_mattofile(mat,filename)
 }
 
-function addline(filename,tab,line,str){
 
+function booktabs_addline(filename,tab,line,str){
   string matrix mat
+  string matrix table
   real scalar calltab
   real scalar endtab
-  string matrix table
   real scalar where
 
   mat = cat(filename)
-  calltab = getpos(mat,"\begin{tabular}*")[tab]
-  endtab = getpos(mat,"\end{tabular}*")[tab]
+  calltab = booktabs_getpos(mat,"\begin{tabular}*")[tab]
+  endtab = booktabs_getpos(mat,"\end{tabular}*")[tab]
 
   table = mat[calltab..endtab]
-  where = getpos(table,"*\\")[line]
+  where = booktabs_getpos(table,"*\\")[line]
 
   table = table[1..where] \ (str) \ table[where+1..rows(table)]
   mat = mat[1..calltab-1] \ table \ mat[endtab..rows(mat)]
 
-  mattofile(mat,filename)
+  booktabs_mattofile(mat,filename)
 }
+
 end
