@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 2.0  20mar2021}{...}
+{* *! version 1.0  6mar2021}{...}
 
 {title:Booktabs}
 
@@ -21,8 +21,6 @@ Add custom lines to an exported table:
 
 {pstd}
 {cmd:booktabs addline} {help using} {it:filename.tex}, {bf:[table(}{it:int}{bf:)]} {bf:line(}{it:int}{bf:)} {bf:str(}{it:string}{bf:)}
-}
-}
 
 
 {title:Options for booktabs export}
@@ -40,13 +38,13 @@ Add custom lines to an exported table:
 {title:Options for booktabs addline}
 
 {pstd}
-{bf:table}: select the table where the string should be added. This option does not need to be specified if there is only one table in the selected {it:tex} file.
+{bf:table(}{it:int}{bf:)}: select the table where the string should be added. This option does not need to be specified if there is only one table in the selected {it:tex} file.
 
 {pstd}
-{bf:line}: select the line where the string should be added.
+{bf:line(}{it:int}{bf:)}: select the line where the string should be added.
 
 {pstd}
-{bf:string}: string to be added to the table.
+{bf:str(}{it:string}{bf:)}: string to be added to the table.
 
 
 {title:Author}
