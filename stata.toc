@@ -1,4 +1,4 @@
-v 1.0.1
+v 2.0.1
 d booktabs: exports Stata 17 tables in .tex format using booktabs.
 d
 d
