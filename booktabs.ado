@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 2.0
+version 2.0.1
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -93,7 +93,7 @@ function booktabs_addline(filename,tab,line,str){
   where = booktabs_getpos(table,"*\\")[line]
 
   table = table[1..where] \ (str) \ table[where+1..rows(table)]
-  mat = mat[1..calltab-1] \ table \ mat[endtab..rows(mat)]
+  mat = mat[1..calltab-1] \ table \ mat[endtab+1..rows(mat)]
 
   booktabs_mattofile(mat,filename)
 }
