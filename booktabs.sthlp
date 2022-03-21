@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0  6mar2021}{...}
+{* *! version 2.0  21mar2021}{...}
 
 {title:Booktabs}
 
@@ -13,8 +13,7 @@
 Export tables:
 
 {pstd}
-  {cmd:booktabs export} {help using} {it:filename.tex}, {bf:[replace]} {bf:[tableonly]} {bf:[append]}
-}
+  {cmd:booktabs export} {help using} {it:filename.tex}, {bf:[replace]} {bf:[tableonly]} {bf:[append]} {bf:[fontsize(}{it:size}{bf:)]}
 
 {pstd}
 Add custom lines to an exported table:
@@ -33,6 +32,9 @@ Add custom lines to an exported table:
 
 {pstd}
 {bf:append}: append to an existing file
+
+{pstd}
+{bf:fontsize(}{it:size}{bf:)}: specify size of letter font to be used within tabulars. Available options: {it:normalsize}, {it:small}, {it:footnotesize}, {it:scriptsize}, {it:tiny}.
 
 
 {title:Options for booktabs addline}
