@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 2.0.1
+version 2.1
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -21,12 +21,17 @@ end
 
 capture: program drop booktabs_export
 program define booktabs_export
-  syntax name using/, [tableonly] [replace] [append]
+  syntax name using/, [tableonly] [replace] [append] [fontsize(string)]
 
   collect style cell border_block, border(left right, pattern(nil))
 
+  if !inlist("`fontsize'","","normalsize","small","footnotesize","scriptsize","tiny"){
+    noisily: display as error "fontsize not specified correctly"
+    exit 198
+  }
+
   collect export `using', `tableonly' `replace' `append'
-  mata: booktabs_export("`using'","`tableonly'")
+  mata: booktabs_export("`using'","`tableonly'","`fontsize'")
 end
 
 capture: program drop booktabs_addline
@@ -49,8 +54,6 @@ void booktabs_mattofile(mat,filename){
 }
 
 function booktabs_getpos(mat,str){
-  numeric matrix lines
-
   lines = 0
   for (i=1; i<=rows(mat); i++){
     if (strmatch(mat[i],str)) lines = lines , i
@@ -59,8 +62,9 @@ function booktabs_getpos(mat,str){
   return(lines)
 }
 
-void booktabs_export(filename,mode){
+void booktabs_export(filename,mode,fontsize){
   mat = cat(filename)
+  mat = ("") \ mat
 
   lines = booktabs_getpos(mat,"\cline{*}")
   for (i=1; i<=cols(lines); i++){
@@ -69,6 +73,21 @@ void booktabs_export(filename,mode){
   }
   mat[rowmax(lines)] = "\bottomrule"
   mat[rowmin(lines)] = "\toprule"
+
+  if (fontsize != ""){
+    calltab = booktabs_getpos(mat,"\begin{tabular}*")
+    endtab = booktabs_getpos(mat,"\end{tabular}*")
+
+    for (i=1; i<=cols(calltab); i++){
+      mat =
+      mat[1..calltab[i]-1]       \
+      ("\begin{"+fontsize+"}")   \
+      mat[calltab[i]..endtab[i]] \
+      ("\end{"+fontsize+"}")     \
+      mat[endtab[i]+1..rows(mat)]
+    }
+  }
+  mat = mat[2..rows(mat)]
 
   if (mode == ""){
     mat = mat[1] \ ("\usepackage{booktabs}") \ mat[2..rows(mat)]
@@ -79,12 +98,6 @@ void booktabs_export(filename,mode){
 
 
 function booktabs_addline(filename,tab,line,str){
-  string matrix mat
-  string matrix table
-  real scalar calltab
-  real scalar endtab
-  real scalar where
-
   mat = cat(filename)
   calltab = booktabs_getpos(mat,"\begin{tabular}*")[tab]
   endtab = booktabs_getpos(mat,"\end{tabular}*")[tab]
