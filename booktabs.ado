@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 2.1
+version 2.1.1
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -21,7 +21,7 @@ end
 
 capture: program drop booktabs_export
 program define booktabs_export
-  syntax name using/, [tableonly] [replace] [append] [fontsize(string)]
+  syntax name using/, [TABLEonly] [replace] [append] [FONTsize(string)]
 
   collect style cell border_block, border(left right, pattern(nil))
 
