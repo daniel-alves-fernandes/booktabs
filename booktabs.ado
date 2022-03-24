@@ -75,17 +75,15 @@ void booktabs_export(filename,mode,fontsize){
   mat[rowmin(lines)] = "\toprule"
 
   if (fontsize != ""){
-    calltab = booktabs_getpos(mat,"\begin{tabular}*")
-    endtab = booktabs_getpos(mat,"\end{tabular}*")
+    calltab = booktabs_getpos(mat,"\begin{tabular}*")[1]
+    endtab = booktabs_getpos(mat,"\end{tabular}*")[1]
 
-    for (i=1; i<=cols(calltab); i++){
-      mat =
-      mat[1..calltab[i]-1]       \
-      ("\begin{"+fontsize+"}")   \
-      mat[calltab[i]..endtab[i]] \
-      ("\end{"+fontsize+"}")     \
-      mat[endtab[i]+1..rows(mat)]
-    }
+    mat =
+    mat[1..calltab[i]-1]       \
+    ("\begin{"+fontsize+"}")   \
+    mat[calltab[i]..endtab[i]] \
+    ("\end{"+fontsize+"}")     \
+    mat[endtab[i]+1..rows(mat)]
   }
   mat = mat[2..rows(mat)-1]
 
