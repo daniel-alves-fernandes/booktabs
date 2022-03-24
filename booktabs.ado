@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 2.1.1
+version 2.1.2
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -64,11 +64,11 @@ function booktabs_getpos(mat,str){
 
 void booktabs_export(filename,mode,fontsize){
   mat = cat(filename)
-  mat = ("") \ mat
+  mat = ("") \ mat \ ("")
 
   lines = booktabs_getpos(mat,"\cline{*}")
   for (i=1; i<=cols(lines); i++){
-    opts = substr(mat[lines[1]],strpos(mat[lines[1]],"{"),.)
+    opts = substr(mat[lines[i]],strpos(mat[lines[i]],"{"),.)
     mat[lines[i]] = "\cmidrule" + opts
   }
   mat[rowmax(lines)] = "\bottomrule"
@@ -87,7 +87,7 @@ void booktabs_export(filename,mode,fontsize){
       mat[endtab[i]+1..rows(mat)]
     }
   }
-  mat = mat[2..rows(mat)]
+  mat = mat[2..rows(mat)-1]
 
   if (mode == ""){
     mat = mat[1] \ ("\usepackage{booktabs}") \ mat[2..rows(mat)]
