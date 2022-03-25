@@ -1,7 +1,7 @@
 /******************************************************************************
 booktabs.ado
 
-version 2.1.2
+version 2.1.3
 
 author: Daniel Fernandes
 contact: daniel.fernandes@eui.eu
@@ -53,37 +53,31 @@ void booktabs_mattofile(mat,filename){
   fclose(tfile)
 }
 
-function booktabs_getpos(mat,str){
-  lines = 0
-  for (i=1; i<=rows(mat); i++){
-    if (strmatch(mat[i],str)) lines = lines , i
-  }
-  lines = lines[1,2..cols(lines)]
-  return(lines)
-}
 
 void booktabs_export(filename,mode,fontsize){
   mat = cat(filename)
   mat = ("") \ mat \ ("")
 
-  lines = booktabs_getpos(mat,"\cline{*}")
-  for (i=1; i<=cols(lines); i++){
+  lines = selectindex(strmatch(mat,"\cline{*}"))
+  for (i=1; i<=rows(lines); i++){
     opts = substr(mat[lines[i]],strpos(mat[lines[i]],"{"),.)
     mat[lines[i]] = "\cmidrule" + opts
   }
-  mat[rowmax(lines)] = "\bottomrule"
-  mat[rowmin(lines)] = "\toprule"
+  mat[colmax(lines)] = "\bottomrule"
+  mat[colmin(lines)] = "\toprule"
 
   if (fontsize != ""){
-    calltab = booktabs_getpos(mat,"\begin{tabular}*")[1]
-    endtab = booktabs_getpos(mat,"\end{tabular}*")[1]
+    ntables = sum(strmatch(mat,"\begin{tabular}*"))
+    assert(ntables == sum(strmatch(mat,"\end{tabular}*")))
 
-    mat =
-    mat[1..calltab[i]-1]       \
-    ("\begin{"+fontsize+"}")   \
-    mat[calltab[i]..endtab[i]] \
-    ("\end{"+fontsize+"}")     \
-    mat[endtab[i]+1..rows(mat)]
+    for (i=1; i<=ntables; i++){
+      calltab = selectindex(strmatch(mat,"\begin{tabular}*"))[i]
+      endtab = selectindex(strmatch(mat,"\end{tabular}*"))[i]
+
+      mat = mat[1..calltab-1] \ ("\begin{"+fontsize+"}") \
+            mat[calltab..endtab] \ ("\end{"+fontsize+"}") \
+            mat[endtab+1..rows(mat)]
+    }
   }
   mat = mat[2..rows(mat)-1]
 
@@ -97,11 +91,11 @@ void booktabs_export(filename,mode,fontsize){
 
 function booktabs_addline(filename,tab,line,str){
   mat = cat(filename)
-  calltab = booktabs_getpos(mat,"\begin{tabular}*")[tab]
-  endtab = booktabs_getpos(mat,"\end{tabular}*")[tab]
+  calltab = selectindex(strmatch(mat,"\begin{tabular}*"))[tab]
+  endtab = selectindex(strmatch(mat,"\end{tabular}*"))[tab]
 
   table = mat[calltab+1..endtab-1]
-  where = booktabs_getpos(table,"*\\")[line]
+  where = selectindex(strmatch(table,"*\\"))[line]
 
   table = table[1..where] \ (str) \ table[where+1..rows(table)]
   mat = mat[1..calltab] \ table \ mat[endtab..rows(mat)]
